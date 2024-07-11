@@ -1,6 +1,6 @@
 import os
-from scipy.io import loadmat
-from config import temp_path, perm_path
+from scipy.io import loadmat # type: ignore
+from config import temp_path, perm_path # type: ignore
 
 def load_data(patient, date, shift, batch, file_idx, folder, modality):
     """

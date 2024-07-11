@@ -3,7 +3,8 @@ import pandas as pd
 import datetime
 import pathlib
 from timeit import default_timer as timer
-from config import temp_path, perm_path
+from config import temp_path, perm_path # type: ignore
+import argparse
 
 def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     """
@@ -120,3 +121,17 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     print("-------------------------------------")
 
     return None
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description = "Generate time-stamps")
+    parser.add_argument('patient', type=int, help="The patient number/code")
+    parser.add_argument('date', type=int, help="Date of recording in format yyyymmdd")
+    parser.add_argument('shift', type=str, help="D, A, or N shift")
+    parser.add_argument('batch', type=int, help="Batch index of recordings from same shift")
+    parser.add_argument('n_files', type=int, help="Total number of files in batch")
+    parser.add_argument('start_idx', type=int, help="File number to strat TSG, usually 1")
+    parser.add_argument('folder', type=str, help="Location of files, temp or perm")
+
+    args = parser.parse_args()
+
+    TSG(args.patient, args.date, args.shift, args.batch, args.n_files, args.start_idx, args.folder)
