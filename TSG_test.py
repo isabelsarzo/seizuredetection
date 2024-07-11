@@ -7,24 +7,26 @@ from config import temp_path, perm_path
 
 def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     """
-    Generates the time-stamps for a specific EMG-ACM recording acquired with the Cometa system. 
+    Generates the time-stamps for a full batch of EMG-ACM recordings acquired with the Cometa system 
+    and exports them (along with the raw data) to csv files in the temporary folder. 
+
     Requirements:
-    -Original C3D file (or an unmodified version)
-    -Text file containing the data from the C3D file exported by the EMG and Motion Tools software
+    -Original C3D files (or the unmodified versions)
+    -Text files containing the data from the C3D files exported by the EMG and Motion Tools software
 
     Args
     -------------------------------
     -patient: patient's assigned number/code without the 'p'.
-    -date: date that appears in the file name in the format yyyymmdd.
-    -shift: either 'D' (day/morning shift), 'A' (afternoon shift), or 'N' (night shift) as appears in file name.
-    -batch: recording batch number as appears in file name. Note that files from the same date and shift have the same batch number.
-    -n_files:
-    -start_idx:
+    -date: date that appears in the file names, format yyyymmdd.
+    -shift: either 'D' (day/morning shift), 'A' (afternoon shift), or 'N' (night shift) as appears in file names.
+    -batch: recording batch number as appears in file names. Note that files from the same date and shift have the same batch number.
+    -n_files: total number of files in the batch. This has to be equal or greater than start_idx.
+    -start_idx: starting file number (usually always 1)
     -folder: either 'temp' (temporary folder) or 'perm' (permanent folder), depending on the location of the file.
     
     Returns
     -------------------------------
-    -data: dataframe containing the data with its corresponding time-stamps as indexes. 
+    None 
 
     """ 
     start_timer = timer()
@@ -43,13 +45,18 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
         elif folder == 'perm':
             path = perm_path
         
+        # Get full path for .txt file
         dirpath = f"{path}{patient}"
         file_name = f"p{patient}_{date}_{shift}_{batch}_{i}.txt"
         file = os.path.join(dirpath, file_name)
-        #file = pathlib.Path(r'I:\Chercheurs\BouAssi_Elie\Data\Cometa\p308\p308_20240703_D_43_7.txt')
+
+        # Load raw data
         data = pd.read_csv(file, sep='\t', skiprows=[0])
+
+        # Get the name of the column that contains the time (seconds) of each datapoint
         time = data.columns[0]
 
+        # Change the column name to "sec"
         if time == 'Time(s):':
             data = data.rename(columns={'Time(s):': 'sec'})
         else:
@@ -57,24 +64,26 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
         
         sec = data['sec'].to_numpy()
 
+        # Get full path for .c3d file
         file_no_extension = os.path.splitext(file)[0]
         c3d_file = pathlib.Path(f'{file_no_extension}.c3d')
 
-        # Verify C3D file existence
-        if not os.path.exists(c3d_file):
+        if not os.path.exists(c3d_file): # Verify .c3d file existence
             print('The C3D file was not found. Make sure to save it with the same name and path as the text file.')
         else:
             print(f'FILE {i} of {n_files}:')
             print('Retrieving information...')
+
+            # Get the last modification date-time of the .c3d file
             dt_vec = c3d_file.stat().st_mtime 
             time_stopped = datetime.datetime.fromtimestamp(dt_vec).strftime('%d-%b-%Y %H:%M:%S.%f')
             print(f'-Recording stopped at {time_stopped}')
         
-            # Time that the recording lasts
+            # Calculate the duration of the recording
             duration_s = sec[-1]
             print(f'-Recording duration is {duration_s} seconds')
 
-            # Time at which the recording started
+            # Calculate the time at which the recording started
             time_started = (datetime.datetime.strptime(time_stopped, '%d-%b-%Y %H:%M:%S.%f') - datetime.timedelta(seconds=duration_s)).strftime('%d-%b-%Y %H:%M:%S.%f')
             print(f'-Recording started at {time_started}')
 
@@ -87,15 +96,17 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
 
             print("Generating time-stamps for file...")
 
+            # Generate time-stamp for each datapoint and use it as index in the dataframe
             data.index = pd.date_range(start=time_started, periods=len(sec), freq=pd.DateOffset(seconds=T)).strftime('%d-%b-%Y %H:%M:%S.%f')
             data.index.name = 'Time'
             
-            #path_save = f'{file_no_extension}_TimeTable.rda'
-            #pyreadr.write_rdata(path_save, {'data_with_timestamps': data_with_timestamps})
+            # Get full path for output .csv file
             outpath = f"{temp_path}{patient}"
             outfile = os.path.join(outpath, file_name)
             outfile_no_ext = os.path.splitext(outfile)[0]
             csv_file = pathlib.Path(f'{outfile_no_ext}_TimeStamps.csv')
+
+            # Export data with time-stamps to .csv file
             data.to_csv(csv_file)
             print("Success!")
 
@@ -106,9 +117,6 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     end_timer = timer()
     elapsed = end_timer - start_timer
     print(f'Code executed in {elapsed:.2f} seconds')
-    return data
+    print("-------------------------------------")
 
-data_with_timestamps = TSG(302, 20240525, 'D', 9, 9, 9, 'perm')
-print("Data with time-stamps:")
-print(data_with_timestamps.head(5))
-print(data_with_timestamps.tail(5))
+    return None
