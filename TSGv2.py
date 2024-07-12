@@ -47,9 +47,11 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
             path = perm_path
         
         # Get full path for .txt file
-        dirpath = f"{path}{patient}"
+        #dirpath = f"{path}{patient}"
+        dirpath = path / f"p{patient}"
         file_name = f"p{patient}_{date}_{shift}_{batch}_{i}.txt"
-        file = os.path.join(dirpath, file_name)
+        #file = os.path.join(dirpath, file_name)
+        file = dirpath / file_name
 
         # Load raw data
         data = pd.read_csv(file, sep='\t', skiprows=[0])
@@ -102,9 +104,9 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
             data.index.name = 'Time'
             
             # Get full path for output .csv file
-            outpath = f"{temp_path}{patient}"
-            outfile = os.path.join(outpath, file_name)
-            outfile_no_ext = os.path.splitext(outfile)[0]
+            outpath = temp_path / f"p{patient}" / file_name
+            #outfile = os.path.join(outpath, file_name)
+            outfile_no_ext = os.path.splitext(outpath)[0]
             csv_file = pathlib.Path(f'{outfile_no_ext}_TimeStamps.csv')
 
             # Export data with time-stamps to .csv file
