@@ -23,7 +23,7 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     -batch: recording batch number as appears in file names. Note that files from the same date and shift have the same batch number.
     -n_files: total number of files in the batch. This has to be equal or greater than start_idx.
     -start_idx: starting file number (usually always 1)
-    -folder: either 'temp' (temporary folder) or 'perm' (permanent folder), depending on the location of the file.
+    -folder: either 'temp' (temporary folder) or 'perm' (permanent folder), depending on the location of the .c3d and .txt files.
     
     Returns
     -------------------------------
