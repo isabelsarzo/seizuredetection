@@ -1,4 +1,4 @@
 from pathlib import Path
 
-temp_path = Path(r"I:\Chercheurs\BouAssi_Elie\Projets\Cometa\TempData\p")
-perm_path = Path(r"I:\Chercheurs\BouAssi_Elie\Data\Cometa\p")
+temp_path = Path('/home/isabelsarzo/smb_share/Projets/Cometa/TempData')
+perm_path = Path('/home/isabelsarzo/smb_share/Data/Cometa')

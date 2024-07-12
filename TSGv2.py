@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('shift', type=str, help="D, A, or N shift")
     parser.add_argument('batch', type=int, help="Batch index of recordings from same shift")
     parser.add_argument('n_files', type=int, help="Total number of files in batch")
-    parser.add_argument('start_idx', type=int, help="File number to strat TSG, usually 1")
+    parser.add_argument('start_idx', type=int, help="File number to start TSG, usually 1")
     parser.add_argument('folder', type=str, help="Location of files, temp or perm")
 
     args = parser.parse_args()
