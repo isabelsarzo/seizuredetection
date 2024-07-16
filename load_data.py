@@ -55,11 +55,11 @@ def load_data(patient, date, shift, batch, file_idx, folder, modality):
         data = data.drop(data.columns[1:9], axis=1)
 
     # Downsample data by a factor of 2
-    data_ds = data.iloc[::2, :]
+    data_ds = data.iloc[::2, :].copy()
 
     # Convert 'Time' column to datetime and set it as index
-    data['Time'] = pd.to_datetime(data['Time'])
-    data.set_index('Time', inplace=True)
+    data_ds['Time'] = pd.to_datetime(data_ds['Time'], format='%d-%b-%Y %H:%M:%S.%f')
+    data_ds.set_index('Time', inplace=True)
 
     return data_ds, time_s
 
