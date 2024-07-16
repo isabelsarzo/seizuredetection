@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from load_data import load_data
+from timeit import default_timer as timer
 
 def plotEMG(data, muscles, y_axis_max, colorsch):
     """
@@ -65,7 +66,12 @@ def plotEMG(data, muscles, y_axis_max, colorsch):
 
     return None
 
+start_timer = timer()
 
 data, time_s = load_data(308, 20240703, 'A', 44, 5, 'temp', 'emg')
 clip = data.iloc[0:60000, :]
 plotEMG(clip, 'all', 3500, 1)
+
+end_timer = timer()
+elapsed = end_timer - start_timer
+print(f'Code executed in {elapsed:.2f} seconds')
