@@ -37,7 +37,7 @@ def plotEMG(data, muscles, y_axis_max, colorsch):
 
     y_axis_min = -1 * y_axis_max
     
-    fig, axes = plt.subplots(len(data.columns), sharex=True, figsize=(20, 2*len(data.columns)))
+    fig, axes = plt.subplots(len(data.columns), sharex=True, figsize=(15, len(data.columns)))
 
     if len(data.columns) == 1:
         axes = [axes]
