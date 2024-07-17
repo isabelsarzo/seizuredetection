@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from load_data import load_data
-from timeit import default_timer as timer
 
 def plotEMG(data, muscles, y_axis_max, colorsch):
     """
@@ -9,9 +7,9 @@ def plotEMG(data, muscles, y_axis_max, colorsch):
 
     Args:
     -----------------------------------------------------------------
-    data: dataframe containing the emg data and timestamps to plot
+    data: dataframe containing the emg data and timestamps (as indexes) to plot
     muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels
-    y_axis_max: float, y-axis limit as absolute value
+    y_axis_max: int, y-axis limit as absolute value
     colorsch: whether to plot channels with the same color scheme used in Cometa (1 for yes, 0 for no)
 
     Returns:
@@ -62,16 +60,6 @@ def plotEMG(data, muscles, y_axis_max, colorsch):
 
     plt.tight_layout()
     plt.show()
-    plt.savefig("emg_1min.png")
+    plt.savefig("emgsignals.png")
 
     return None
-
-start_timer = timer()
-
-data, time_s = load_data(308, 20240703, 'A', 44, 5, 'temp', 'emg')
-clip = data.iloc[0:60000, :]
-plotEMG(clip, 'all', 3500, 1)
-
-end_timer = timer()
-elapsed = end_timer - start_timer
-print(f'Code executed in {elapsed:.2f} seconds')
