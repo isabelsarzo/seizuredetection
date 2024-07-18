@@ -6,10 +6,10 @@ from timeit import default_timer as timer
 from config import temp_path, perm_path # type: ignore
 import argparse
 
-def TSG(patient, date, shift, batch, n_files, start_idx, folder):
+def TSG(patient, date, shift, batch, CRhrs, folder):
     """
     Generates the time-stamps for a full batch of EMG-ACM recordings acquired with the Cometa system 
-    and exports them (along with the raw data) to csv files in the temporary folder. 
+    and exports them (along with the raw data) to an HDF5 file in the temporary folder. 
 
     Requirements:
     -Original C3D files (or the unmodified versions)
@@ -20,9 +20,8 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     -patient: patient's assigned number/code without the 'p'.
     -date: date that appears in the file names, format yyyymmdd.
     -shift: either 'D' (day/morning shift), 'A' (afternoon shift), or 'N' (night shift) as appears in file names.
-    -batch: recording batch number as appears in file names. Note that files from the same date and shift have the same batch number.
-    -n_files: total number of files in the batch. This has to be equal or greater than start_idx.
-    -start_idx: starting file number (usually always 1)
+    -batch: recording batch number as appears in file names.
+    -CRhrs: total number of continuous recording hours (total nb of files in the batch).
     -folder: either 'temp' (temporary folder) or 'perm' (permanent folder), depending on the location of the .c3d and .txt files.
     
     Returns
@@ -40,17 +39,15 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
     date = str(date)
     batch = str(batch)
 
-    for i in range(start_idx, n_files + 1):
+    for i in range(1, CRhrs + 1):
         if folder == 'temp':
             path = temp_path
         elif folder == 'perm':
             path = perm_path
         
         # Get full path for .txt file
-        #dirpath = f"{path}{patient}"
         dirpath = path / f"p{patient}"
         file_name = f"p{patient}_{date}_{shift}_{batch}_{i}.txt"
-        #file = os.path.join(dirpath, file_name)
         file = dirpath / file_name
 
         # Load raw data
@@ -74,7 +71,7 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
         if not os.path.exists(c3d_file): # Verify .c3d file existence
             print('The C3D file was not found. Make sure to save it with the same name and path as the text file.')
         else:
-            print(f'FILE {i} of {n_files}:')
+            print(f'FILE {i} of {CRhrs}:')
             print('Retrieving information...')
 
             # Get the last modification date-time of the .c3d file
@@ -103,14 +100,11 @@ def TSG(patient, date, shift, batch, n_files, start_idx, folder):
             data.index = pd.date_range(start=time_started, periods=len(sec), freq=pd.DateOffset(seconds=T)).strftime('%d-%b-%Y %H:%M:%S.%f')
             data.index.name = 'Time'
             
-            # Get full path for output .csv file
-            outpath = temp_path / f"p{patient}" / file_name
-            #outfile = os.path.join(outpath, file_name)
-            outfile_no_ext = os.path.splitext(outpath)[0]
-            csv_file = pathlib.Path(f'{outfile_no_ext}_TimeStamps.csv')
+            # Get full path for output .h5 file
+            hdf5file = temp_path / f"p{patient}" / f"p{patient}_{date}_{shift}_{batch}.h5"
 
-            # Export data with time-stamps to .csv file
-            data.to_csv(csv_file)
+            # Export data with time-stamps to .h5 file
+            data.to_hdf(hdf5file, key=f"Hour{i}")
             print("Success!")
 
     print("-------------------------------------")
@@ -130,10 +124,9 @@ if __name__ == '__main__':
     parser.add_argument('date', type=int, help="Date of recording in format yyyymmdd")
     parser.add_argument('shift', type=str, help="D, A, or N shift")
     parser.add_argument('batch', type=int, help="Batch index of recordings from same shift")
-    parser.add_argument('n_files', type=int, help="Total number of files in batch")
-    parser.add_argument('start_idx', type=int, help="File number to start TSG, usually 1")
+    parser.add_argument('CRhrs', type=int, help="Number of continuous recording hours")
     parser.add_argument('folder', type=str, help="Location of files, temp or perm")
 
     args = parser.parse_args()
 
-    TSG(args.patient, args.date, args.shift, args.batch, args.n_files, args.start_idx, args.folder)
+    TSG(args.patient, args.date, args.shift, args.batch, args.CRhrs, args.folder)
