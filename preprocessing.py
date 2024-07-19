@@ -4,11 +4,17 @@ from plot_tools import plotEMG, plotFreq
 from scipy.signal import butter, sosfilt
 
 def highpass(data, cutoff):
+    # TODO: write the docstring to explain function
     filtdesign = butter(2, cutoff, 'highpass', fs=1000, output='sos')
     data_hp = sosfilt(filtdesign, data)
     return data_hp
 
+def notch(data, cutoffs):
+    # TODO
+    return None
+
 def preprocess(data, hp_cutoff):
+    # TODO: write the docstring to explain function
     time = data.index
     channels = data.columns
     
@@ -37,4 +43,4 @@ signal_hp = data_f.iloc[:, 1].values
 channel2 = "Filtered Left Trapeze"
 plotFreq(signal_hp, channel2, "FreqFiltered")
 
-
+# TODO: create a function to extract a timerange of data
