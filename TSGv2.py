@@ -35,10 +35,6 @@ def TSG(patient, date, shift, batch, CRhrs, folder):
     print("           PROCESS STARTED           ")
     print("-------------------------------------")
 
-    patient = str(patient)
-    date = str(date)
-    batch = str(batch)
-
     for i in range(1, CRhrs + 1):
         if folder == 'temp':
             path = temp_path
@@ -112,8 +108,8 @@ def TSG(patient, date, shift, batch, CRhrs, folder):
     print("-------------------------------------")
 
     end_timer = timer()
-    elapsed = end_timer - start_timer
-    print(f'Code executed in {elapsed:.2f} seconds')
+    elapsed = (end_timer - start_timer) / 60
+    print(f'Code executed in {elapsed:.2f} minutes')
     print("-------------------------------------")
 
     return None
