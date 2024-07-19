@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from scipy.fftpack import fft
-import numpy as np
+from load_data import load_data
+from timeit import default_timer as timer
+import mplcursors
 
-def plotEMG(data, muscles, y_axis_max, colorsch, title):
+def plotEMG(data, muscles, y_axis_max, colorsch):
     """
     Plots the specified EMG channels
 
@@ -13,7 +14,6 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
     muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels
     y_axis_max: int, y-axis limit as absolute value
     colorsch: whether to plot channels with the same color scheme used in Cometa (1 for yes, 0 for no)
-    title: str, title of the figure
 
     Returns:
     -----------------------------------------------------------------
@@ -40,7 +40,7 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
 
     y_axis_min = -1 * y_axis_max
     
-    fig, axes = plt.subplots(len(data.columns), sharex=True, figsize=(15, len(data.columns)))
+    fig, axes = plt.subplots(len(data.columns), sharex=True, figsize=(20, 2*len(data.columns)))
 
     if len(data.columns) == 1:
         axes = [axes]
@@ -52,7 +52,7 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
         ax.set_xlim([data.index[0], data.index[-1]])
 
         if i == 0:
-            ax.set_title(title, fontsize=14)
+            ax.set_title("EMG signals", fontsize=14)
 
         if i == len(data.columns) - 1:
             ax.set_xlabel("Time")
@@ -61,49 +61,18 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
         else:
             ax.set_xticks([])
 
+    mplcursors.cursor(hover=True)
     plt.tight_layout()
     plt.show()
-    plt.savefig(f"{title}.png")
+    plt.savefig("emg_1min.png")
 
     return None
 
-def plotFreq(signal, channel_name, save_name, fs=1000):
-    """
-    Plots the frequency spectrum of a single EMG channel
+start_timer = timer()
 
-    Args:
-    -----------------------------------------------------------------
-    signal: array containing the emg data of a single EMG channel
-    channel_name: str, name of the channel that will be displayed in the title of the figure
-    save_name: str, file name to save the figure as (.png)
-    fs: sampling frequency of the signal, default: 1000 Hz
+data, time_s = load_data(308, 20240701, 'N', 38, 1, 'temp', 'emg')
+plotEMG(data, 'all', 3500, 1)
 
-    Returns:
-    -----------------------------------------------------------------
-    None
-
-    """
-    # Compute period
-    T = 1/fs
-
-    # Compute frequency axis
-    nsig = len(signal)
-    freqs = np.fft.fftfreq(nsig, T)
-    freq_axis = freqs[:nsig // 2]
-    
-    # Apply Fast Fourier Transform
-    signalFFT = fft(signal)
-    y = (np.abs(signalFFT)[:nsig // 2]) / nsig
-
-    # Plot frequency spectrum
-    plt.figure(figsize=(12, 6))
-    plt.plot(freq_axis, y)
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('Magnitude')
-    plt.title(f"Frequency Spectrum of {channel_name}")
-    plt.grid()
-    plt.tight_layout()
-    plt.show()
-    plt.savefig(f"{save_name}.png")
-
-    return None
+end_timer = timer()
+elapsed = end_timer - start_timer
+print(f'Code executed in {elapsed:.2f} seconds')
