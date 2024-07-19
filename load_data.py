@@ -12,7 +12,7 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
     -date: date that appears in the file name in the format yyyymmdd.
     -shift: either 'D' (day/morning shift), 'A' (afternoon shift), or 'N' (night shift) as appears in file name.
     -batch: recording batch number as appears in file name. Note that files from the same date and shift have the same batch number.
-    -hrIdx: int, hour index within the number of continuous recording hours.
+    -hrIdx: int, hour index within the number of continuous recording hours. 0 to load complete recording.
     -folder: either 'temp' (temporary folder) or 'perm' (permanent folder), depending on the location of the file.
     -modality: either 'emg' (get EMG data only), 'acm' (get ACM data only), or 'both' (get both EMG and ACM data).
 
@@ -34,7 +34,18 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
     dirpath = path / f"p{patient}"
     file_name = f"p{patient}_{date}_{shift}_{batch}.h5"
     file = dirpath / file_name
-    data = pd.read_hdf(file, f"Hour{hrIdx}")
+
+    if hrIdx == 0:
+        dataframes = []
+        with pd.HDFStore(file, mode='r') as store:
+            keys = store.keys()
+            nkeys = len(keys)
+            for i in range(1, nkeys + 1):
+                df = pd.read_hdf(file, f"Hour{i}")
+                dataframes.append(df)
+        data = pd.concat(dataframes)      
+    else:
+        data = pd.read_hdf(file, f"Hour{hrIdx}")
 
     # Extract time in seconds (for Cometa software)
     time_s = data['sec'].values
@@ -54,7 +65,14 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
 
     # Convert 'Time' column to datetime and set it as index
     data_ds.index = pd.to_datetime(data_ds.index, format='%d-%b-%Y %H:%M:%S.%f')
-    #data_ds.set_index('Time', inplace=True)
+
+    # info = {
+    #     'RECstart': start,
+    #     'RECend': end,
+    #     'CRhrs': hours,
+    #     'RECduration': dur,
+    #     'SampFreq': fs,
+    # }
 
     return data_ds, time_s
 
