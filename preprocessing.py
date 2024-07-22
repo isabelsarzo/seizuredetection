@@ -3,6 +3,10 @@ from load_data import load_data
 from plot_tools import plotEMG, plotFreq
 from scipy.signal import butter, sosfilt
 
+def timerange(data, startTime, endTime):
+    datarange = data[startTime : endTime]
+    return datarange
+
 def highpass(data, cutoff):
     # TODO: write the docstring 
     hpass_design = butter(2, cutoff, 'highpass', fs=1000, output='sos')
@@ -31,20 +35,24 @@ def preprocess(data, hp_cutoff, notch_cutoffs):
 
     # Recreate dataframe
     data_f = pd.DataFrame(data_filtered, index=time, columns=channels)
+    data_f.index = pd.to_datetime(data_f.index, format='%d-%b-%Y %H:%M:%S.%f')
 
     return data_f
 
 data, time_s = load_data(308, 20240703, 'A', 44, 5, 'temp', 'emg')
-data_f = preprocess(data, 10, [59, 61])
+datarange = timerange(data, '2024-07-03 19:54:19', '2024-07-03 19:56:21')
+plotEMG(datarange, 'all', 3500, 1, 'seizure')
 
-plotEMG(data, 'all', 3500, 0, "Original")
-signal = data.iloc[:, 1].values
-channel = "Original Left Trapeze"
-plotFreq(signal, channel, "FreqOriginal")
+# data_f = preprocess(data, 10, [59, 61])
 
-plotEMG(data_f, 'all', 3500, 0, "Filtered")
-signal_hp = data_f.iloc[:, 1].values
-channel2 = "Filtered Left Trapeze"
-plotFreq(signal_hp, channel2, "FreqFiltered")
+# plotEMG(data, 'all', 3500, 0, "Original")
+# signal = data.iloc[:, 1].values
+# channel = "Original Left Trapeze"
+# plotFreq(signal, channel, "FreqOriginal")
+
+# plotEMG(data_f, 'all', 3500, 0, "Filtered")
+# signal_hp = data_f.iloc[:, 1].values
+# channel2 = "Filtered Left Trapeze"
+# plotFreq(signal_hp, channel2, "FreqFiltered")
 
 # TODO: create a function to extract a timerange of data
