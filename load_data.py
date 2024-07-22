@@ -18,15 +18,14 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
 
     Returns
     -------------------------------
-    -data_ds: dataframe containing the downsampled data as specified by input arguments.
-    -time_s: numpy array containing the equivalent time in seconds (to use as reference in the EMG and Motion Tools software).
+    -data_ds: dataframe containing the downsampled data as specified by input arguments. Note: The timestamps are returned as datetime objects, not strings.
+    -time_s: numpy array containing the equivalent time in seconds (to use as reference in the EMG and Motion Tools software). Note: should have the same nb of rows as data_ds
 
     """
     print("Loading data...")
     # Check the location of the file to load
     if folder == 'temp':
-        path = temp_path
-    
+        path = temp_path    
     elif folder == 'perm':
         path = perm_path
 
@@ -65,15 +64,6 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
 
     # Convert 'Time' column to datetime and set it as index
     data_ds.index = pd.to_datetime(data_ds.index, format='%d-%b-%Y %H:%M:%S.%f')
-
-    # info = {
-    #     'RECstart': start,
-    #     'RECend': end,
-    #     'CRhrs': hours,
-    #     'RECduration': dur,
-    #     'SampFreq': fs,
-    # }
-
     return data_ds, time_s
 
 if __name__ == '__main__':
@@ -82,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('date', type=int, help="Date of recording in format yyyymmdd")
     parser.add_argument('shift', type=str, help="D, A, or N shift")
     parser.add_argument('batch', type=int, help="Batch index of recordings from same shift")
-    parser.add_argument('hrIdx', type=int, help="Specific hour within the continuous rec hrs")
+    parser.add_argument('hrIdx', type=int, help="Specific hour within the continuous rec hrs or 0 for all")
     parser.add_argument('folder', type=str, help="Location of files, temp or perm")
     parser.add_argument('modality', type=str, help="emg, acm, or both")
 

@@ -9,11 +9,11 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
 
     Args:
     -----------------------------------------------------------------
-    data: dataframe containing the emg data and timestamps (as indexes) to plot
-    muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels
-    y_axis_max: int, y-axis limit as absolute value
-    colorsch: whether to plot channels with the same color scheme used in Cometa (1 for yes, 0 for no)
-    title: str, title of the figure
+    -data: dataframe containing the emg data and timestamps (as indexes) to plot
+    -muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels
+    -y_axis_max: int, y-axis limit as absolute value
+    -colorsch: whether to plot channels with the same color scheme used in Cometa (1 for yes, 0 for no)
+    -title: str, title of the figure
 
     Returns:
     -----------------------------------------------------------------
@@ -73,10 +73,10 @@ def plotFreq(signal, channel_name, save_name, fs=1000):
 
     Args:
     -----------------------------------------------------------------
-    signal: array containing the emg data of a single EMG channel
-    channel_name: str, name of the channel that will be displayed in the title of the figure
-    save_name: str, file name to save the figure as (.png)
-    fs: sampling frequency of the signal, default: 1000 Hz
+    -signal: array containing the emg data of a single EMG channel
+    -channel_name: str, name of the channel that will be displayed in the title of the figure
+    -save_name: str, file name to save the figure as (.png)
+    -fs: sampling frequency of the signal, default: 1000 Hz
 
     Returns:
     -----------------------------------------------------------------
