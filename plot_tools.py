@@ -57,9 +57,14 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
         if i == len(data.columns) - 1:
             ax.set_xlabel("Time")
             ax.xaxis.set_major_locator(mdates.AutoDateLocator(interval_multiples=True))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%b-%Y %H:%M:%S'))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
         else:
             ax.set_xticks([])
+
+    date_rec_started = data.index[0].strftime('%d-%b-%Y')
+    date_rec_ended = data.index[-1].strftime('%d-%b-%Y')
+    fig.text(0.01, 0.01, f'{date_rec_started}', horizontalalignment='left')
+    fig.text(0.99, 0.01, f'{date_rec_ended}', horizontalalignment='right')
 
     plt.tight_layout()
     plt.show()
