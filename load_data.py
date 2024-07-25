@@ -1,6 +1,17 @@
 import pandas as pd
+import c3d
+import numpy as np
 from config import temp_path, perm_path # type: ignore
-import argparse
+from TSGv3 import generate_timestamps   # type: ignore
+
+class OriginalRecordingInfo:
+    def __init__(self, data, time):
+        self.fs = 1 / (time[1] - time[0])
+        self.samples = len(data)
+        self.channels = len(data.columns)
+        self.startTime = data.index[0]
+        self.endTime = data.index[-1]
+        self.duration = time[-1]
 
 def load_data(patient, date, shift, batch, hrIdx, folder, modality):
     """
@@ -23,6 +34,7 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
 
     """
     print("Loading data...")
+
     # Check the location of the file to load
     if folder == 'temp':
         path = temp_path    
@@ -62,20 +74,74 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
     # Downsample data by a factor of 2
     data_ds = data.iloc[::2, :].copy()
 
-    # Convert 'Time' column to datetime and set it as index
+    # Convert 'Time' column to datetime 
     data_ds.index = pd.to_datetime(data_ds.index, format='%d-%b-%Y %H:%M:%S.%f')
+
     return data_ds, time_s
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = "Generate time-stamps")
-    parser.add_argument('patient', type=int, help="The patient number/code")
-    parser.add_argument('date', type=int, help="Date of recording in format yyyymmdd")
-    parser.add_argument('shift', type=str, help="D, A, or N shift")
-    parser.add_argument('batch', type=int, help="Batch index of recordings from same shift")
-    parser.add_argument('hrIdx', type=int, help="Specific hour within the continuous rec hrs or 0 for all")
-    parser.add_argument('folder', type=str, help="Location of files, temp or perm")
-    parser.add_argument('modality', type=str, help="emg, acm, or both")
+def readC3D(patient, date, shift, batch, idx, folder, modality):
+    
+    print("Loading C3D data...")
 
-    args = parser.parse_args()
+    # Check the location of the file to load
+    if folder == 'temp':
+        path = temp_path    
+    elif folder == 'perm':
+        path = perm_path
 
-    data_ds, time_s = load_data(args.patient, args.date, args.shift, args.batch, args.hrIdx, args.folder, args.modality)
+    # Load .c3d file
+    dirpath = path / f"p{patient}"
+    file_name = f"p{patient}_{date}_{shift}_{batch}_{idx}.c3d"
+    file = dirpath / file_name
+
+    with open(file, 'rb') as c3dfile:
+        frames = c3d.Reader(c3dfile)
+        analog_samples = []
+        for i, points, analog in frames.read_frames():
+            analog_transposed = np.array(analog).T
+            analog_samples.append(analog_transposed)
+
+    # Concatenate the samples stored in frames
+    all_analog_samples = np.concatenate(analog_samples, axis=0)
+
+    # Convert to dataframe
+    data_analog = pd.DataFrame(all_analog_samples, columns=frames.analog_labels)
+
+    # Order columns
+    new_order = [0, 4, 8, 12, 16, 20, 24, 28,
+                1, 5, 9, 13, 17, 21, 25, 29,
+                2, 6, 10, 14, 18, 22, 26, 30,
+                3, 7, 11, 15, 19, 23, 27, 31]
+    data = data_analog.iloc[:, new_order]
+    data.columns = data.columns.str.strip().str.replace(r'\s+', ' ', regex=True)
+
+    # Remove zero-padding
+    data = data.apply(lambda x: np.trim_zeros(x, 'b'), axis=0)
+
+    # Generate time axis (units = seconds) as in EMG and Motion Tools
+    T = 1 / frames.analog_rate      # period in seconds
+    dur = (len(data) - 1) * T       # duration in seconds
+    time = np.linspace(0.0, dur, num=len(data), dtype=float)
+
+    # Generate timestamps
+    timestamps = generate_timestamps(file, time)
+    data.index = timestamps
+    data.index.name = 'Time-stamps'
+
+    # Retrieve original recording information
+    rawInfo = OriginalRecordingInfo(data, time)
+
+    # Extract either only EMG, only ACM, or both
+    if modality == 'emg':
+        data = data.iloc[:, 0:8] 
+    elif modality == 'acm':
+        data = data.drop(data.columns[0:8], axis=1)
+
+    # Downsample data by a factor of 2
+    data_ds = data.iloc[::2, :].copy()
+    time_ds = time[::2]
+
+    # Convert timestamps to datetime 
+    data_ds.index = pd.to_datetime(data_ds.index, format='%d-%b-%Y %H:%M:%S.%f')
+    
+    return data_ds, time_ds, rawInfo
