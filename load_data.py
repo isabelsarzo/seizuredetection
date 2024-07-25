@@ -5,6 +5,7 @@ from config import temp_path, perm_path # type: ignore
 from TSGv3 import generate_timestamps   # type: ignore
 
 class OriginalRecordingInfo:
+    # TODO: write explanation of attributes
     def __init__(self, data, time):
         self.fs = 1 / (time[1] - time[0])
         self.samples = len(data)
@@ -13,7 +14,7 @@ class OriginalRecordingInfo:
         self.endTime = data.index[-1]
         self.duration = time[-1]
 
-def load_data(patient, date, shift, batch, hrIdx, folder, modality):
+def readHDF5(patient, date, shift, batch, hrIdx, folder, modality):
     """
     Loads EMG-ACM data (with timestamps) from an HDF5 file and downsamples it
 
@@ -33,7 +34,7 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
     -time_s: numpy array containing the equivalent time in seconds (to use as reference in the EMG and Motion Tools software). Note: should have the same nb of rows as data_ds
 
     """
-    print("Loading data...")
+    print("Loading HDF5 data...")
 
     # Check the location of the file to load
     if folder == 'temp':
@@ -80,7 +81,9 @@ def load_data(patient, date, shift, batch, hrIdx, folder, modality):
     return data_ds, time_s
 
 def readC3D(patient, date, shift, batch, idx, folder, modality):
-    
+    # TODO: write docstring
+    # TODO: time how long it takes to read the file and generate the timestamps
+    # TODO: make github repository private so that you can upload your code
     print("Loading C3D data...")
 
     # Check the location of the file to load

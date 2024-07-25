@@ -2,7 +2,7 @@ import pandas as pd
 import datetime
 
 def generate_timestamps(c3d_filepath, time):
-    
+    # TODO: write docstring
     print("Retrieving recording information...")
 
     # Get period

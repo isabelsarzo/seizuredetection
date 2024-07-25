@@ -1,7 +1,5 @@
-emgsignals.png
 verif.ipynb
-Filtered.png
-Original.png
-FreqFiltered.png
-FreqOriginal.png
-test.py
+script.py
+Raw EMG signals.png
+images
+c3dtest.py
