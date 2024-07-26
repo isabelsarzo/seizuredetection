@@ -1,8 +1,11 @@
 import pandas as pd
 import c3d
+import warnings
 import numpy as np
 from config import temp_path, perm_path # type: ignore
 from TSGv3 import generate_timestamps   # type: ignore
+
+warnings.filterwarnings("ignore", module="c3d.c3d")
 
 class OriginalRecordingInfo:
     # TODO: write explanation of attributes

@@ -13,7 +13,7 @@ def plotEMG(data, muscles='all', y_axis_max=3500, colors=True, title='EMG'):
     -muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels. Default='all'
     -y_axis_max: int, y-axis limit as absolute value, default=3500 (uV)
     -colors: bool, whether to plot channels with the same color scheme used in Cometa, default=True
-    -title: str, title of the figure
+    -title: str, title of the plot and .png figure, default='EMG'
 
     Returns:
     -----------------------------------------------------------------
