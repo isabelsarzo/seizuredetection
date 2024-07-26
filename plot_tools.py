@@ -3,16 +3,16 @@ import matplotlib.dates as mdates
 from scipy.fftpack import fft
 import numpy as np
 
-def plotEMG(data, muscles, y_axis_max, colorsch, title):
+def plotEMG(data, muscles='all', y_axis_max=3500, colors=True, title='EMG'):
     """
     Plots the specified EMG channels
 
     Args:
     -----------------------------------------------------------------
     -data: dataframe containing the emg data and timestamps (as indexes) to plot
-    -muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels
-    -y_axis_max: int, y-axis limit as absolute value
-    -colorsch: whether to plot channels with the same color scheme used in Cometa (1 for yes, 0 for no)
+    -muscles: list of ones and/or zeros (1 for yes, 0 for no) of selected channels to plot, or str 'all' to select all channels. Default='all'
+    -y_axis_max: int, y-axis limit as absolute value, default=3500 (uV)
+    -colors: bool, whether to plot channels with the same color scheme used in Cometa, default=True
     -title: str, title of the figure
 
     Returns:
@@ -26,10 +26,10 @@ def plotEMG(data, muscles, y_axis_max, colorsch, title):
 
     # Get muscles to drop and colors to use
     musc2drop = [index for index, value in enumerate(muscles) if value == 0]
-    if colorsch == 1:
+    if colors:
         colors = ['firebrick', 'darkorange', 'goldenrod', 'seagreen', 'lightseagreen', 'mediumblue', 'darkorchid', 'sienna']
         colors2plot = [color for index, color in enumerate(colors) if index not in musc2drop]
-    elif colorsch == 0:
+    else:
         colors2plot = ['tab:blue'] * len(data.columns)
 
     # Get column names of muscles to drop
